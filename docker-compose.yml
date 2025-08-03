@@ -1,0 +1,57 @@
+services:
+  tomcat:
+    build: .
+    container_name: tomcat10-https
+    ports:
+      - "8088:8088"
+      - "8443:8443"
+    volumes:
+      - ./certs/keystore.p12:/opt/tomcat/conf/keystore.p12
+      - ./logs:/opt/tomcat/logs
+    depends_on:
+      - postgres
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=dongcopper80
+      - DB_USER=dongnt
+      - DB_PASSWORD=dongcopper80
+      - CATALINA_OPTS=-Xms512m -Xmx1024m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - tomcat_network
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: dongcopper80
+      POSTGRES_USER: dongnt
+      POSTGRES_PASSWORD: dongcopper80
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dongnt -d dongcopper80"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tomcat_network
+
+networks:
+  tomcat_network:
+    driver: bridge
+volumes:
+  pgdata:
+    driver: local
+      

@@ -1,0 +1,25 @@
+CREATE USER dongnt WITH PASSWORD 'dongcopper80';
+CREATE ROLE dongnt WITH LOGIN PASSWORD 'dongcopper80';
+
+CREATE DATABASE dongcopper80
+  WITH 
+    OWNER = dongnt
+    ENCODING = 'UTF8'
+    LC_COLLATE = 'en_US.UTF-8'
+    LC_CTYPE = 'en_US.UTF-8'
+    TEMPLATE = template0;
+
+GRANT ALL PRIVILEGES ON DATABASE dongcopper80 TO dongnt;
+GRANT ALL ON SCHEMA public TO dongnt;
+
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(100) NOT NULL,
+  email VARCHAR(100) NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email);
